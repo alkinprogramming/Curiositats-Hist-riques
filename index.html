@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Curiositats Històriques</title>
+    
+    <!-- Icona per a la pestanya del navegador (Favicon) -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📜</text></svg>">
+
+    <style>
+        /* Estils Generals i Paleta de Colors */
+        :root {
+            --color-fons: #12161a;
+            --color-targeta: #1c232b;
+            --color-text: #e2e8f0;
+            --color-daurat: #dfb15b;
+            --color-daurat-clar: #f3d798;
+            --color-vora: #2c3743;
+            --color-desactivat: #4a5568;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--color-fons);
+            color: var(--color-text);
+            line-height: 1.6;
+        }
+
+        /* Capçalera */
+        header {
+            background: linear-gradient(rgba(18, 22, 26, 0.8), rgba(18, 22, 26, 0.95)), 
+                        url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1000') no-repeat center center/cover;
+            padding: 60px 20px;
+            text-align: center;
+            border-bottom: 3px solid var(--color-daurat);
+        }
+
+        header h1 {
+            color: var(--color-daurat);
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        header p {
+            font-style: italic;
+            color: #a0aec0;
+            font-size: 1.2rem;
+        }
+
+        /* Contenidor Principal */
+        .container {
+            max-width: 1100px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        /* Títols de secció */
+        h2.seccio-titol {
+            color: var(--color-daurat);
+            border-left: 4px solid var(--color-daurat);
+            padding-left: 12px;
+            margin-bottom: 25px;
+            font-size: 1.8rem;
+        }
+
+        /* Reixeta de Curiositats */
+        .curiositats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+            min-height: 400px;
+        }
+
+        /* Targetes de contingut */
+        .targeta {
+            background-color: var(--color-targeta);
+            border: 1px solid var(--color-vora);
+            border-radius: 8px;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .targeta:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5), 0 0 10px rgba(223, 177, 91, 0.2);
+            border-color: var(--color-daurat);
+        }
+
+        .targeta-categoria {
+            background-color: var(--color-vora);
+            color: var(--color-daurat);
+            padding: 5px 15px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            align-self: flex-start;
+            border-bottom-right-radius: 8px;
+        }
+
+        .targeta-contingut {
+            padding: 25px;
+            flex-grow: 1;
+        }
+
+        .targeta h3 {
+            color: var(--color-daurat-clar);
+            font-size: 1.4rem;
+            margin-bottom: 15px;
+        }
+
+        .targeta p {
+            color: #cbd5e0;
+            font-size: 0.95rem;
+        }
+
+        /* Contenidor del Paginador */
+        .paginacio-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 60px;
+        }
+
+        .boto-pag {
+            background-color: var(--color-targeta);
+            color: var(--color-daurat);
+            border: 1px solid var(--color-vora);
+            padding: 8px 16px;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .boto-pag:hover:not(:disabled) {
+            background-color: var(--color-daurat);
+            color: var(--color-fons);
+            border-color: var(--color-daurat);
+        }
+
+        .boto-pag:disabled {
+            color: var(--color-desactivat);
+            border-color: var(--color-vora);
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        #info-pagina {
+            font-size: 1rem;
+            color: #a0aec0;
+        }
+
+        /* Secció del Formulari d'enviament */
+        .formulari-seccio {
+            background-color: var(--color-targeta);
+            border: 1px solid var(--color-vora);
+            border-radius: 8px;
+            padding: 40px;
+            margin-top: 50px;
+        }
+
+        .formulari-grup {
+            margin-bottom: 20px;
+        }
+
+        .formulari-grup label {
+            display: block;
+            color: var(--color-daurat-clar);
+            margin-bottom: 8px;
+            font-weight: bold;
+            font-size: 0.95rem;
+        }
+
+        .formulari-grup input, 
+        .formulari-grup select, 
+        .formulari-grup textarea {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--color-fons);
+            border: 1px solid var(--color-vora);
+            border-radius: 4px;
+            color: #fff;
+            font-family: inherit;
+            font-size: 1rem;
+        }
+
+        .formulari-grup input:focus, 
+        .formulari-grup select:focus, 
+        .formulari-grup textarea:focus {
+            outline: none;
+            border-color: var(--color-daurat);
+            box-shadow: 0 0 5px rgba(223, 177, 91, 0.3);
+        }
+
+        .boto {
+            background-color: var(--color-daurat);
+            color: var(--color-fons);
+            border: none;
+            padding: 12px 28px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            width: 100%;
+        }
+
+        .boto:hover {
+            background-color: var(--color-daurat-clar);
+        }
+
+        /* Peu de pàgina */
+        footer {
+            text-align: center;
+            padding: 40px 20px;
+            margin-top: 60px;
+            border-top: 1px solid var(--color-vora);
+            color: #718096;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 600px) {
+            header h1 { font-size: 2rem; }
+            .formulari-seccio { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Curiositats Històriques</h1>
+        <p>"La història és l'únic laboratori que tenim per provar les nostres idees" — L.P. Jacks</p>
+    </header>
+
+    <div class="container">
+        
+        <h2 class="seccio-titol">Arxiu de Curiositats</h2>
+        
+        <!-- Reixeta on es mostraran les curiositats d'aquesta pàgina -->
+        <div class="curiositats-grid" id="grid-curiositats"></div>
+
+        <!-- Controls de Paginació (5 per pàgina) -->
+        <div class="paginacio-container">
+            <button class="boto-pag" id="boto-anterior" onclick="canviarPagina(-1)">Anterior</button>
+            <span id="info-pagina">Pàgina 1 de 1</span>
+            <button class="boto-pag" id="boto-següent" onclick="canviarPagina(1)">Següent</button>
+        </div>
+
+        <!-- Formulari per pujar noves curiositats -->
+        <div class="formulari-seccio">
+            <h2 class="seccio-titol" style="margin-bottom: 10px;">Afegeix la teva Curiositat</h2>
+            <p style="color: #a0aec0; margin-bottom: 25px;">Forma part de l'arxiu històric de la web compartint una dada sorprenent.</p>
+            
+            <form id="formulari-curiositat">
+                <div class="formulari-grup">
+                    <label for="titol">Títol de la curiositat</label>
+                    <input type="text" id="titol" placeholder="Ex: El misteri de la colònia perduda..." required>
+                </div>
+
+                <div class="formulari-grup">
+                    <label for="categoria">Categoria / Època</label>
+                    <select id="categoria" required>
+                        <option value="Edat Antiga">Edat Antiga</option>
+                        <option value="Edat Mitjana">Edat Mitjana</option>
+                        <option value="Edat Moderna">Edat Moderna</option>
+                        <option value="Edat Contemporània">Edat Contemporània</option>
+                        <option value="Món Antic">Món Antic</option>
+                    </select>
+                </div>
+
+                <div class="formulari-grup">
+                    <label for="descripcio">Explicació del fet històric</label>
+                    <textarea id="descripcio" rows="4" placeholder="Escriu aquí tota la història detallada..." required></textarea>
+                </div>
+
+                <button type="submit" class="boto">Publicar a la web</button>
+            </form>
+        </div>
+
+    </div>
+
+    <footer>
+        <p>&copy; 2026 El Gabinet de les Curiositats. Allotjat gratuïtament a GitHub Pages.</p>
+    </footer>
+
+    <script>
+        // Llista oficial amb exactament 8 curiositats històriques fixades
+        const curiositatsInicials = [
+            {
+                categoria: "Edat Mitjana",
+                titol: "1. Ricard Cor de Lleó no parlava anglès",
+                descripcio: "Tot i ser un dels reis més famosos d'Anglaterra, només hi va passar uns 6 mesos durant els seus 10 anys de regnat. La seva llengua materna era l'occità i el francès, i veia les illes com un simple mètode per finançar les seves guerres exteriors."
+            },
+            {
+                categoria: "Edat Contemporània",
+                titol: "2. La guerra dels 38 minuts",
+                descripcio: "La guerra més curta de la història documentada va durar exactament entre 38 i 45 minuts. Va passar el 27 d'agost de 1896 entre el Regne Unit i Zanzíbar. El soldà local es va rendir ràpidament després dels contundents bombardejos britànics al palau."
+            },
+            {
+                categoria: "Món Antic",
+                titol: "3. Les piràmides i els mamuts",
+                descripcio: "Quan els egipcis construïen les famoses Piràmides de Giza (cap al 2500 a.C.), encara quedaven mamuts llanuts vius a la petita illa de Wrangel, a Sibèria. No es van extingir del tot fins a l'any 1650 a.C., amb un Egipte ja molt desenvolupat."
+            },
+            {
+                categoria: "Edat Moderna",
+                titol: "4. L'epidèmia de ball de 1518",
+                descripcio: "A Estrasburg, una dona va començar a ballar bojament al carrer sense música. En un mes, més de 400 persones s'hi havien unit sense cap motiu aparent. Moltes van acabar morint per infarts, esgotament extrem o vessaments cerebrals."
+            },
+            {
+                categoria: "Edat Antiga",
+                titol: "5. Els ninjes anaven camuflats de carrer",
+                descripcio: "Al contrari del que ens ensenya el cinema, els ninjes del Japó feudal no vestien sempre un vestit negre cenyit ni llançaven estrelles constantment. Eren espies d'elit que preferien vestir com a monjos o comerciants vulgars per barrejar-se amb la gent."
+            },
+            {
+                categoria: "Edat Mitjana",
+                titol: "6. El judici al cadàver d'un Papa",
+                descripcio: "L'any 897, el Papa Esteve VI va fer desenterrar el cadàver del seu enemic i predecessor, el Papa Formós. El va vestir amb els hàbits papals màxims, el va asseure en un tron del Vaticà i el va sotmetre a un judici formal on el cadàver va ser condemnat."
+            },
+            {
+                categoria: "Edat Moderna",
+                titol: "7. Una galleda robada va causar una guerra",
+                descripcio: "L'any 1325, les ciutats italianes de Mòdena i Bolonya van iniciar un conflicte bèl·lic brutal simplement perquè uns soldats de Mòdena van robar una galleda de fusta d'un pou bolonyès. Mòdena va guanyar, i la galleda encara s'exhibeix avui a la seva catedral."
+            },
+            {
+                categoria: "Edat Contemporània",
+                titol: "8. L'ofici de despertador humà",
+                descripcio: "Abans de l'arribada dels despertadors mecànics assequibles durant la Revolució Industrial, existia l'ofici del 'Knocker-up'. Eren persones que es llogaven per anar amb canyes llargues a colpejar els vidres de les finestres per aixecar els treballadors d'hora."
+            }
+        ];
+
+        let paginaActual = 1;
+        const elementsPerPagina = 5;
+
+        function carregarCuriositats() {
+            const grid = document.getElementById('grid-curiositats');
+            grid.innerHTML = ''; 
+
+            let dades = JSON.parse(localStorage.getItem('lesMevesCuriositats'));
+            if (!dades) {
+                dades = curiositatsInicials;
+                localStorage.setItem('lesMevesCuriositats', JSON.stringify(dades));
+            }
+
+            const totalElements = dades.length;
+            const totalPagines = Math.ceil(totalElements / elementsPerPagina);
+            
+            if (paginaActual > totalPagines) paginaActual = totalPagines;
+            if (paginaActual < 1) paginaActual = 1;
+
+            const inici = (paginaActual - 1) * elementsPerPagina;
+            const fi = inici + elementsPerPagina;
+            
+            const dadesPagina = dades.slice(inici, fi);
+
+            dadesPagina.forEach(item => {
+                const targeta = document.createElement('div');
+                targeta.className = 'targeta';
+                targeta.innerHTML = `
+                    <span class="targeta-categoria">${item.categoria}</span>
+                    <div class="targeta-contingut">
+                        <h3>${item.titol}</h3>
+                        <p>${item.descripcio}</p>
+                    </div>
+                `;
+                grid.appendChild(targeta);
+            });
+
+            document.getElementById('info-pagina').textContent = `Pàgina ${paginaActual} de ${totalPagines || 1}`;
+            document.getElementById('boto-anterior').disabled = (paginaActual === 1);
+            document.getElementById('boto-següent').disabled = (paginaActual === totalPagines || totalPagines === 0);
+        }
+
+        function canviarPagina(direccio) {
+            paginaActual += direccio;
+            carregarCuriositats();
+            document.getElementById('grid-curiositats').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        document.getElementById('formulari-curiositat').addEventListener('submit', function(e) {
+            e.preventDefault(); 
+
+            const nouTitol = document.getElementById('titol').value;
+            const novaCategoria = document.getElementById('categoria').value;
+            const novaDescripcio = document.getElementById('descripcio').value;
+
+            const novaCuriositat = {
+                categoria: novaCategoria,
+                titol: nouTitol,
+                descripcio: novaDescripcio
+            };
+
+            let dadesActuals = JSON.parse(localStorage.getItem('lesMevesCuriositats'));
+            
+            // Afegim les noves curiositats a l'inici per visualitzar-les al moment
+            dadesActuals.unshift(novaCuriositat);
+            localStorage.setItem('lesMevesCuriositats', JSON.stringify(dadesActuals));
+
+            paginaActual = 1;
+            carregarCuriositats();
+
+            document.getElementById('formulari-curiositat').reset();
+        });
+
+        carregarCuriositats();
+    </script>
+</body>
+</html>
