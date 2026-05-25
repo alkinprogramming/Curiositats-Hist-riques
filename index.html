@@ -5,8 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Curiositats Històriques</title>
     
-    <!-- Icona per a la pestanya del navegador (Favicon) -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📜</text></svg>">
+
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
     <style>
         /* Estils Generals i Paleta de Colors */
@@ -18,6 +19,7 @@
             --color-daurat-clar: #f3d798;
             --color-vora: #2c3743;
             --color-desactivat: #4a5568;
+            --color-excel: #107c41;
         }
 
         * {
@@ -72,13 +74,65 @@
             font-size: 1.8rem;
         }
 
+        /* Barra de Filtres i Eines */
+        .barra-eines {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            background-color: var(--color-targeta);
+            border: 1px solid var(--color-vora);
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+
+        .filtre-grup {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .filtre-grup label {
+            font-weight: bold;
+            color: var(--color-daurat-clar);
+        }
+
+        .select-filtre {
+            padding: 8px 16px;
+            background-color: var(--color-fons);
+            border: 1px solid var(--color-vora);
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .boto-excel {
+            background-color: var(--color-excel);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background-color 0.2s;
+        }
+
+        .boto-excel:hover {
+            background-color: #0b592e;
+        }
+
         /* Reixeta de Curiositats */
         .curiositats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 30px;
             margin-bottom: 30px;
-            min-height: 400px;
+            min-height: 200px;
         }
 
         /* Targetes de contingut */
@@ -236,6 +290,9 @@
         @media (max-width: 600px) {
             header h1 { font-size: 2rem; }
             .formulari-seccio { padding: 20px; }
+            .barra-eines { flex-direction: column; align-items: stretch; }
+            .filtre-grup { flex-direction: column; align-items: stretch; }
+            .boto-excel { justify-content: center; }
         }
     </style>
 </head>
@@ -249,18 +306,33 @@
     <div class="container">
         
         <h2 class="seccio-titol">Arxiu de Curiositats</h2>
+
+        <div class="barra-eines">
+            <div class="filtre-grup">
+                <label for="filtre-categoria">Filtra per època:</label>
+                <select id="filtre-categoria" class="select-filtre" onchange="filtrarCategoria()">
+                    <option value="totes">🌍 Mostra-les totes</option>
+                    <option value="Edat Antiga">Edat Antiga</option>
+                    <option value="Edat Mitjana">Edat Mitjana</option>
+                    <option value="Edat Moderna">Edat Moderna</option>
+                    <option value="Edat Contemporània">Edat Contemporània</option>
+                    <option value="Món Antic">Món Antic</option>
+                </select>
+            </div>
+            
+            <button class="boto-excel" onclick="exportarAExcel()">
+                📊 Exportar a Excel (.xlsx)
+            </button>
+        </div>
         
-        <!-- Reixeta on es mostraran les curiositats d'aquesta pàgina -->
         <div class="curiositats-grid" id="grid-curiositats"></div>
 
-        <!-- Controls de Paginació (5 per pàgina) -->
         <div class="paginacio-container">
             <button class="boto-pag" id="boto-anterior" onclick="canviarPagina(-1)">Anterior</button>
             <span id="info-pagina">Pàgina 1 de 1</span>
             <button class="boto-pag" id="boto-següent" onclick="canviarPagina(1)">Següent</button>
         </div>
 
-        <!-- Formulari per pujar noves curiositats -->
         <div class="formulari-seccio">
             <h2 class="seccio-titol" style="margin-bottom: 10px;">Afegeix la teva Curiositat</h2>
             <p style="color: #a0aec0; margin-bottom: 25px;">Forma part de l'arxiu històric de la web compartint una dada sorprenent.</p>
@@ -298,53 +370,23 @@
     </footer>
 
     <script>
-        // Llista oficial amb exactament 8 curiositats històriques fixades
+        // Base de dades amb les 8 curiositats fixades
         const curiositatsInicials = [
-            {
-                categoria: "Edat Mitjana",
-                titol: "1. Ricard Cor de Lleó no parlava anglès",
-                descripcio: "Tot i ser un dels reis més famosos d'Anglaterra, només hi va passar uns 6 mesos durant els seus 10 anys de regnat. La seva llengua materna era l'occità i el francès, i veia les illes com un simple mètode per finançar les seves guerres exteriors."
-            },
-            {
-                categoria: "Edat Contemporània",
-                titol: "2. La guerra dels 38 minuts",
-                descripcio: "La guerra més curta de la història documentada va durar exactament entre 38 i 45 minuts. Va passar el 27 d'agost de 1896 entre el Regne Unit i Zanzíbar. El soldà local es va rendir ràpidament després dels contundents bombardejos britànics al palau."
-            },
-            {
-                categoria: "Món Antic",
-                titol: "3. Les piràmides i els mamuts",
-                descripcio: "Quan els egipcis construïen les famoses Piràmides de Giza (cap al 2500 a.C.), encara quedaven mamuts llanuts vius a la petita illa de Wrangel, a Sibèria. No es van extingir del tot fins a l'any 1650 a.C., amb un Egipte ja molt desenvolupat."
-            },
-            {
-                categoria: "Edat Moderna",
-                titol: "4. L'epidèmia de ball de 1518",
-                descripcio: "A Estrasburg, una dona va començar a ballar bojament al carrer sense música. En un mes, més de 400 persones s'hi havien unit sense cap motiu aparent. Moltes van acabar morint per infarts, esgotament extrem o vessaments cerebrals."
-            },
-            {
-                categoria: "Edat Antiga",
-                titol: "5. Els ninjes anaven camuflats de carrer",
-                descripcio: "Al contrari del que ens ensenya el cinema, els ninjes del Japó feudal no vestien sempre un vestit negre cenyit ni llançaven estrelles constantment. Eren espies d'elit que preferien vestir com a monjos o comerciants vulgars per barrejar-se amb la gent."
-            },
-            {
-                categoria: "Edat Mitjana",
-                titol: "6. El judici al cadàver d'un Papa",
-                descripcio: "L'any 897, el Papa Esteve VI va fer desenterrar el cadàver del seu enemic i predecessor, el Papa Formós. El va vestir amb els hàbits papals màxims, el va asseure en un tron del Vaticà i el va sotmetre a un judici formal on el cadàver va ser condemnat."
-            },
-            {
-                categoria: "Edat Moderna",
-                titol: "7. Una galleda robada va causar una guerra",
-                descripcio: "L'any 1325, les ciutats italianes de Mòdena i Bolonya van iniciar un conflicte bèl·lic brutal simplement perquè uns soldats de Mòdena van robar una galleda de fusta d'un pou bolonyès. Mòdena va guanyar, i la galleda encara s'exhibeix avui a la seva catedral."
-            },
-            {
-                categoria: "Edat Contemporània",
-                titol: "8. L'ofici de despertador humà",
-                descripcio: "Abans de l'arribada dels despertadors mecànics assequibles durant la Revolució Industrial, existia l'ofici del 'Knocker-up'. Eren persones que es llogaven per anar amb canyes llargues a colpejar els vidres de les finestres per aixecar els treballadors d'hora."
-            }
+            { categoria: "Edat Mitjana", titol: "1. Ricard Cor de Lleó no parlava anglès", descripcio: "Tot i ser un dels reis més famosos d'Anglaterra, només hi va passar uns 6 mesos durant els seus 10 anys de regnat. La seva llengua materna era l'occità i el francès, i veia les illes com un simple mètode per finançar les seves guerres exteriors." },
+            { categoria: "Edat Contemporània", titol: "2. La guerra dels 38 minuts", descripcio: "La guerra més curta de la història documentada va durar exactament entre 38 i 45 minuts. Va passar el 27 d'agost de 1896 entre el Regne Unit i Zanzíbar. El soldà local es va rendir ràpidament després dels contundents bombardejos britànics al palau." },
+            { categoria: "Món Antic", titol: "3. Les piràmides i els mamuts", descripcio: "Quan els egipcis construïen les famoses Piràmides de Giza (cap al 2500 a.C.), anticancer quedaven mamuts llanuts vius a la petita illa de Wrangel, a Sibèria. No es van extingir del tot fins a l'any 1650 a.C., amb un Egipte ja molt desenvolupat." },
+            { categoria: "Edat Moderna", titol: "4. L'epidèmia de ball de 1518", descripcio: "A Estrasburg, una dona va començar a ballar bojament al carrer sense música. En un mes, més de 400 persones s'hi havien unit sense cap motiu aparent. Moltes van acabar morint per infarts, esgotament extrem o vessaments cerebrals." },
+            { categoria: "Edat Antiga", titol: "5. Els ninjes anaven camuflats de carrer", descripcio: "Al contrari del que ens ensenya el cinema, els ninjes del Japó feudal no vestien sempre un vestit negre cenyit ni llançaven estrelles constantment. Eren espies d'elit que preferien vestir com a monjos o comerciants vulgars per barrejar-se amb la gent." },
+            { categoria: "Edat Mitjana", titol: "6. El judici al cadàver d'un Papa", descripcio: "L'any 897, el Papa Esteve VI va fer desenterrar el cadàver del seu enemic i predecessor, el Papa Formós. El va vestir amb els hàbits papals màxims, el va asseure en un tron del Vaticà i el va sotmetre a un judici formal on el cadàver va ser condemnat." },
+            { categoria: "Edat Moderna", titol: "7. Una galleda robada va causar una guerra", descripcio: "L'any 1325, les ciutats italianes de Mòdena i Bolonya van iniciar un conflicte bèl·lic brutal simplement perquè uns soldats de Mòdena van robar una galleda de fusta d'un pou bolonyès. Mòdena va guanyar, i la galleda encara s'exhibeix avui a la seva catedral." },
+            { categoria: "Edat Contemporània", titol: "8. L'ofici de despertador humà", descripcio: "Abans de l'arribada dels despertadors mecànics assequibles durant la Revolució Industrial, existia l'ofici del 'Knocker-up'. Eren persones que es llogaven per anar amb canyes llargues a colpejar els vidres de les finestres per aixecar els treballadors d'hora." }
         ];
 
         let paginaActual = 1;
         const elementsPerPagina = 5;
+        let categoriaFiltrada = "totes";
 
+        // Funció per carregar, filtrar i paginar les dades
         function carregarCuriositats() {
             const grid = document.getElementById('grid-curiositats');
             grid.innerHTML = ''; 
@@ -353,6 +395,11 @@
             if (!dades) {
                 dades = curiositatsInicials;
                 localStorage.setItem('lesMevesCuriositats', JSON.stringify(dades));
+            }
+
+            // APLICAR FILTRE DE CATEGORIA
+            if (categoriaFiltrada !== "totes") {
+                dades = dades.filter(item => item.categoria === categoriaFiltrada);
             }
 
             const totalElements = dades.length;
@@ -366,22 +413,33 @@
             
             const dadesPagina = dades.slice(inici, fi);
 
-            dadesPagina.forEach(item => {
-                const targeta = document.createElement('div');
-                targeta.className = 'targeta';
-                targeta.innerHTML = `
-                    <span class="targeta-categoria">${item.categoria}</span>
-                    <div class="targeta-contingut">
-                        <h3>${item.titol}</h3>
-                        <p>${item.descripcio}</p>
-                    </div>
-                `;
-                grid.appendChild(targeta);
-            });
+            if (dadesPagina.length === 0) {
+                grid.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: #718096; padding: 40px;">No s'ha trobat cap curiositat en aquesta època.</p>`;
+            } else {
+                dadesPagina.forEach(item => {
+                    const targeta = document.createElement('div');
+                    targeta.className = 'targeta';
+                    targeta.innerHTML = `
+                        <span class="targeta-categoria">${item.categoria}</span>
+                        <div class="targeta-contingut">
+                            <h3>${item.titol}</h3>
+                            <p>${item.descripcio}</p>
+                        </div>
+                    `;
+                    grid.appendChild(targeta);
+                });
+            }
 
             document.getElementById('info-pagina').textContent = `Pàgina ${paginaActual} de ${totalPagines || 1}`;
-            document.getElementById('boto-anterior').disabled = (paginaActual === 1);
+            document.getElementById('boto-anterior').disabled = (paginaActual === 1 || totalPagines === 0);
             document.getElementById('boto-següent').disabled = (paginaActual === totalPagines || totalPagines === 0);
+        }
+
+        // Event quan l'usuari canvia el desplegable del filtre
+        function filtrarCategoria() {
+            categoriaFiltrada = document.getElementById('filtre-categoria').value;
+            paginaActual = 1; // Tornem a la pàgina 1 en filtrar
+            carregarCuriositats();
         }
 
         function canviarPagina(direccio) {
@@ -390,6 +448,49 @@
             document.getElementById('grid-curiositats').scrollIntoView({ behavior: 'smooth' });
         }
 
+        // SISTEMA D'EXPORTACIÓ A EXCEL (Intel·ligent amb filtres)
+        function exportarAExcel() {
+            // 1. Agafem les dades totals guardades
+            let dadesAExportar = JSON.parse(localStorage.getItem('lesMevesCuriositats')) || curiositatsInicials;
+
+            // 2. Si hi ha un filtre actiu, filtrem l'excel perquè només descarregui el que es veu
+            if (categoriaFiltrada !== "totes") {
+                dadesAExportar = dadesAExportar.filter(item => item.categoria === categoriaFiltrada);
+            }
+
+            if(dadesAExportar.length === 0) {
+                alert("No hi ha dades per exportar en aquesta categoria!");
+                return;
+            }
+
+            // 3. Mapegem les dades per polir els encapçalaments de les columnes de l'Excel
+            const dadesPolides = dadesAExportar.map((item, index) => ({
+                "Núm.": index + 1,
+                "Època / Categoria": item.categoria,
+                "Títol del Fet Històric": item.titol.replace(/^\d+\.\s*/, ""), // Netegem el número del títol si en té
+                "Descripció / Detalls": item.descripcio
+            }));
+
+            // 4. Creem el llibre d'Excel utilitzant la llibreria SheetJS
+            const fullTreball = XLSX.utils.json_to_sheet(dadesPolides);
+            const llibreTreball = XLSX.utils.book_new();
+            
+            XLSX.utils.book_append_sheet(llibreTreball, fullTreball, "Curiositats");
+
+            // Ajustem automàticament l'amplada de les columnes perquè quedi polit
+            fullTreball['!cols'] = [
+                { wch: 6 },  // Núm
+                { wch: 22 }, // Categoria
+                { wch: 35 }, // Títol
+                { wch: 80 }  // Descripció (més ample per al text llarg)
+            ];
+
+            // 5. Generem el fitxer i forcem la descàrrega al navegador
+            const nomFitxer = categoriaFiltrada === "totes" ? "curiositats_historiques_totals.xlsx" : `curiositats_${categoriaFiltrada.replace(" ", "_").toLowerCase()}.xlsx`;
+            XLSX.writeFile(llibreTreball, nomFitxer);
+        }
+
+        // Guardar noves entrades des del formulari
         document.getElementById('formulari-curiositat').addEventListener('submit', function(e) {
             e.preventDefault(); 
 
@@ -403,15 +504,16 @@
                 descripcio: novaDescripcio
             };
 
-            let dadesActuals = JSON.parse(localStorage.getItem('lesMevesCuriositats'));
-            
-            // Afegim les noves curiositats a l'inici per visualitzar-les al moment
+            let dadesActuals = JSON.parse(localStorage.getItem('lesMevesCuriositats')) || curiositatsInicials;
             dadesActuals.unshift(novaCuriositat);
             localStorage.setItem('lesMevesCuriositats', JSON.stringify(dadesActuals));
 
+            // Resetejem filtre i pàgina per veure el que acabem de pujar a dalt de tot
+            document.getElementById('filtre-categoria').value = "totes";
+            categoriaFiltrada = "totes";
             paginaActual = 1;
+            
             carregarCuriositats();
-
             document.getElementById('formulari-curiositat').reset();
         });
 
